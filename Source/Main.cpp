@@ -2,6 +2,8 @@
 #include <vector>
 #include <CL/cl.h>
 
+#include "VoxelArray.h"
+
 int main() {
     // Get the number of platforms
     cl_uint num_platforms;
@@ -52,27 +54,25 @@ int main() {
                 continue;
             }
 
-            // Create a command queue
-            cl_command_queue queue = clCreateCommandQueue(context, device, 0, &err);
+            // Create a command queue with properties
+            const cl_queue_properties properties[] = {0};
+            cl_command_queue queue = clCreateCommandQueueWithProperties(context, device, properties, &err);
             if (err != CL_SUCCESS) {
                 std::cerr << "Failed to create command queue for device: " << device_name << std::endl;
                 clReleaseContext(context);
                 continue;
             }
 
-            // Allocate a buffer of the size of VRAM
-            cl_mem buffer = clCreateBuffer(context, CL_MEM_READ_WRITE, global_mem_size, nullptr, &err);
-            if (err != CL_SUCCESS) {
-                std::cerr << "Failed to allocate buffer on device: " << device_name << std::endl;
-                clReleaseCommandQueue(queue);
-                clReleaseContext(context);
-                continue;
-            }
+            // Create a VoxelArray instance
+            size_t width = 512;
+            size_t height = 512;
+            size_t depth = 512;
+            VoxelArray voxelArray(context, device, queue, width, height, depth);
 
-            std::cout << "  Buffer allocated on device: " << device_name << std::endl;
+            // Process the voxel array
+            voxelArray.process();
 
-            // Release the buffer
-            clReleaseMemObject(buffer);
+            std::cout << "  Voxel array processed on device: " << device_name << std::endl;
 
             // Release the command queue
             clReleaseCommandQueue(queue);

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd ../
+cd ../Binaries
 
 # Run the binary from the Binaries directory
-./Binaries/opencl_gpu_detection
+./opencl_gpu_detection
