@@ -37,7 +37,48 @@ int main() {
             char device_name[1024];
             clGetDeviceInfo(device, CL_DEVICE_NAME, sizeof(device_name), device_name, nullptr);
 
+            // Get global memory size (VRAM)
+            cl_ulong global_mem_size;
+            clGetDeviceInfo(device, CL_DEVICE_GLOBAL_MEM_SIZE, sizeof(global_mem_size), &global_mem_size, nullptr);
+
             std::cout << "GPU Found: " << device_name << std::endl;
+            std::cout << "  VRAM: " << global_mem_size / (1024 * 1024) << " MB" << std::endl;
+
+            // Create a context for the device
+            cl_int err;
+            cl_context context = clCreateContext(nullptr, 1, &device, nullptr, nullptr, &err);
+            if (err != CL_SUCCESS) {
+                std::cerr << "Failed to create context for device: " << device_name << std::endl;
+                continue;
+            }
+
+            // Create a command queue
+            cl_command_queue queue = clCreateCommandQueue(context, device, 0, &err);
+            if (err != CL_SUCCESS) {
+                std::cerr << "Failed to create command queue for device: " << device_name << std::endl;
+                clReleaseContext(context);
+                continue;
+            }
+
+            // Allocate a buffer of the size of VRAM
+            cl_mem buffer = clCreateBuffer(context, CL_MEM_READ_WRITE, global_mem_size, nullptr, &err);
+            if (err != CL_SUCCESS) {
+                std::cerr << "Failed to allocate buffer on device: " << device_name << std::endl;
+                clReleaseCommandQueue(queue);
+                clReleaseContext(context);
+                continue;
+            }
+
+            std::cout << "  Buffer allocated on device: " << device_name << std::endl;
+
+            // Release the buffer
+            clReleaseMemObject(buffer);
+
+            // Release the command queue
+            clReleaseCommandQueue(queue);
+
+            // Release the context
+            clReleaseContext(context);
         }
     }
 
