@@ -9,6 +9,13 @@ VoxelArray::VoxelArray(cl_context context, cl_device_id device, cl_command_queue
     createProgram();
     createKernel();
     setKernelArgs();
+
+    // Print Stats
+    char device_name[1024];
+    clGetDeviceInfo(device, CL_DEVICE_NAME, sizeof(device_name), device_name, nullptr);
+    std::cout << "Created VoxelArray on GPU " << device_name << std::endl;
+
+
 }
 
 VoxelArray::~VoxelArray() {
@@ -38,8 +45,8 @@ void VoxelArray::createProgram() {
     buffer << kernelFile.rdbuf();
     std::string kernelSource = buffer.str();
 
-    std::cout << "Kernel source content:" << std::endl;
-    std::cout << kernelSource << std::endl;
+    // std::cout << "Kernel source content:" << std::endl;
+    // std::cout << kernelSource << std::endl;
 
     const char* source = kernelSource.c_str();
     size_t sourceSize = kernelSource.size();

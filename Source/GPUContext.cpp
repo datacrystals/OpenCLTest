@@ -33,6 +33,12 @@ void GPUContext::terminate() {
     running_ = false;
 }
 
+void GPUContext::waitUntilDone() {
+    while (!taskQueue_.empty()) {
+        std::this_thread::yield();
+    }
+}
+
 void GPUContext::enqueueTask(size_t width, size_t height, size_t depth) {
     std::lock_guard<std::mutex> lock(queueMutex_);
     taskQueue_.emplace(width, height, depth);

@@ -69,6 +69,7 @@ int main() {
 
     // Terminate Threads
     for (auto& GPUContext : gpuContexts) {
+        GPUContext->waitUntilDone();
         GPUContext->terminate();
     }
 

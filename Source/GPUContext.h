@@ -16,6 +16,7 @@ public:
     void enqueueTask(size_t width, size_t height, size_t depth);
     void run();
     void terminate();
+    void waitUntilDone();
 
 private:
     cl_platform_id platform_;
