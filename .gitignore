@@ -1,0 +1,12 @@
+# Ignore build directory
+Build/
+
+# Ignore binaries directory
+Binaries/
+
+# Ignore any generated files
+*.o
+*.a
+*.so
+*.dylib
+*.dll
