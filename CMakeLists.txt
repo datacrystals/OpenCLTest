@@ -8,7 +8,7 @@ add_definitions(-DCL_TARGET_OPENCL_VERSION=300)
 find_package(OpenCL REQUIRED)
 
 # Add executable
-add_executable(opencl_gpu_detection Source/Main.cpp Source/VoxelArray.cpp)
+add_executable(opencl_gpu_detection Source/Main.cpp Source/VoxelArray.cpp Source/GPUContext.cpp)
 
 # Link OpenCL library
 target_link_libraries(opencl_gpu_detection OpenCL::OpenCL)

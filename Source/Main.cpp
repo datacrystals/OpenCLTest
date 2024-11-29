@@ -1,8 +1,9 @@
 #include <iostream>
 #include <vector>
+#include <thread>
 #include <CL/cl.h>
 
-#include "VoxelArray.h"
+#include "GPUContext.h"
 
 int main() {
     // Get the number of platforms
@@ -17,6 +18,10 @@ int main() {
     // Get the platform IDs
     std::vector<cl_platform_id> platforms(num_platforms);
     clGetPlatformIDs(num_platforms, platforms.data(), nullptr);
+
+    // Vector to hold GPUContext instances and threads
+    std::vector<std::unique_ptr<GPUContext>> gpuContexts;
+    std::vector<std::thread> threads;
 
     // Iterate over each platform
     for (cl_platform_id platform : platforms) {
@@ -46,40 +51,25 @@ int main() {
             std::cout << "GPU Found: " << device_name << std::endl;
             std::cout << "  VRAM: " << global_mem_size / (1024 * 1024) << " MB" << std::endl;
 
-            // Create a context for the device
-            cl_int err;
-            cl_context context = clCreateContext(nullptr, 1, &device, nullptr, nullptr, &err);
-            if (err != CL_SUCCESS) {
-                std::cerr << "Failed to create context for device: " << device_name << std::endl;
-                continue;
-            }
+            // Create a GPUContext instance
+            auto gpuContext = std::make_unique<GPUContext>(platform, device);
+            gpuContexts.push_back(std::move(gpuContext));
 
-            // Create a command queue with properties
-            const cl_queue_properties properties[] = {0};
-            cl_command_queue queue = clCreateCommandQueueWithProperties(context, device, properties, &err);
-            if (err != CL_SUCCESS) {
-                std::cerr << "Failed to create command queue for device: " << device_name << std::endl;
-                clReleaseContext(context);
-                continue;
-            }
-
-            // Create a VoxelArray instance
-            size_t width = 512;
-            size_t height = 512;
-            size_t depth = 512;
-            VoxelArray voxelArray(context, device, queue, width, height, depth);
-
-            // Process the voxel array
-            voxelArray.process();
-
-            std::cout << "  Voxel array processed on device: " << device_name << std::endl;
-
-            // Release the command queue
-            clReleaseCommandQueue(queue);
-
-            // Release the context
-            clReleaseContext(context);
+            // Create a thread for the GPUContext
+            threads.emplace_back(&GPUContext::run, gpuContexts.back().get());
         }
+    }
+
+    // Enqueue tasks for each GPUContext
+    for (auto& gpuContext : gpuContexts) {
+        for (int i = 0; i < 50; i++) {
+            gpuContext->enqueueTask(512, 512, 512);
+        }
+    }
+
+    // Wait for all threads to finish
+    for (auto& thread : threads) {
+        thread.join();
     }
 
     return 0;
