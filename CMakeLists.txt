@@ -12,3 +12,6 @@ target_link_libraries(opencl_gpu_detection OpenCL::OpenCL)
 
 # Set output directory for binaries
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/Binaries)
+
+# Ensure the Binaries directory exists
+file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/Binaries)
