@@ -4,7 +4,7 @@
 #include <thread>
 
 GPUContext::GPUContext(cl_platform_id platform, cl_device_id device)
-    : platform_(platform), device_(device), running_(true) {
+    : platform_(platform), device_(device), running_(true), voxelArray_(nullptr) {
     cl_int err;
     context_ = clCreateContext(nullptr, 1, &device_, nullptr, nullptr, &err);
     if (err != CL_SUCCESS) {
@@ -22,8 +22,15 @@ GPUContext::GPUContext(cl_platform_id platform, cl_device_id device)
 }
 
 GPUContext::~GPUContext() {
+    if (voxelArray_) {
+        delete voxelArray_;
+    }
     clReleaseCommandQueue(queue_);
     clReleaseContext(context_);
+}
+
+void GPUContext::terminate() {
+    running_ = false;
 }
 
 void GPUContext::enqueueTask(size_t width, size_t height, size_t depth) {
@@ -50,6 +57,8 @@ void GPUContext::run() {
 }
 
 void GPUContext::processTask(size_t width, size_t height, size_t depth) {
-    VoxelArray voxelArray(context_, device_, queue_, width, height, depth);
-    voxelArray.process();
+    if (!voxelArray_) {
+        voxelArray_ = new VoxelArray(context_, device_, queue_, width, height, depth);
+    }
+    voxelArray_->process();
 }

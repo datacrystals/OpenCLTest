@@ -15,6 +15,7 @@ public:
 
     void enqueueTask(size_t width, size_t height, size_t depth);
     void run();
+    void terminate();
 
 private:
     cl_platform_id platform_;
@@ -25,6 +26,7 @@ private:
     std::mutex queueMutex_;
     std::condition_variable queueCondVar_;
     bool running_;
+    VoxelArray* voxelArray_;
 
     void processTask(size_t width, size_t height, size_t depth);
 };

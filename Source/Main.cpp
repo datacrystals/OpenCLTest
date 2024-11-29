@@ -67,6 +67,11 @@ int main() {
         }
     }
 
+    // Terminate Threads
+    for (auto& GPUContext : gpuContexts) {
+        GPUContext->terminate();
+    }
+
     // Wait for all threads to finish
     for (auto& thread : threads) {
         thread.join();
