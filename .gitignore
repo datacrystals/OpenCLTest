@@ -1,5 +1,6 @@
 # Ignore build directory
 Build/
+build/
 
 # Ignore binaries directory
 Binaries/
